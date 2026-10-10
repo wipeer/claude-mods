@@ -1,0 +1,17 @@
+{
+  "name": "wipeer-claude-mods",
+  "owner": { "name": "wipeer" },
+  "metadata": { "description": "Small quality-of-life mods for Claude Code" },
+  "plugins": [
+    {
+      "name": "folder-title",
+      "source": "./plugins/folder-title",
+      "description": "Prefixes every session title with its project folder: \"<folder> - <title>\""
+    },
+    {
+      "name": "reload-inventory",
+      "source": "./plugins/reload-inventory",
+      "description": "Lists plugins and skills with versions after /reload-plugins and /reload-skills"
+    }
+  ]
+}

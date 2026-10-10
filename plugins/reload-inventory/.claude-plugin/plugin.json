@@ -1,0 +1,10 @@
+{
+  "name": "reload-inventory",
+  "version": "0.3.0",
+  "description": "Lists plugins and skills with versions after /reload-plugins and /reload-skills",
+  "author": { "name": "wipeer" },
+  "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/reload-inventory",
+  "repository": "https://github.com/wipeer/claude-mods",
+  "license": "MIT",
+  "keywords": ["plugins", "skills", "reload", "inventory"]
+}
