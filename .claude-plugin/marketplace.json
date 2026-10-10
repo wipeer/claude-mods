@@ -12,6 +12,11 @@
       "name": "reload-inventory",
       "source": "./plugins/reload-inventory",
       "description": "Lists plugins and skills with versions after /reload-plugins and /reload-skills"
+    },
+    {
+      "name": "drop-relay",
+      "source": "./plugins/drop-relay",
+      "description": "Shows why a hook blocked a prompt on every device, Remote Control included, as a transcript notice"
     }
   ]
 }
