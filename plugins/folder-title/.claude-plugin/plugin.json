@@ -1,6 +1,6 @@
 {
   "name": "folder-title",
-  "version": "0.2.1",
+  "version": "1.0.0",
   "description": "Prefixes every session title with its project folder: \"<folder> - <title>\"",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/folder-title",

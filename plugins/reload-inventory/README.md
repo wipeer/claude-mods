@@ -7,7 +7,7 @@ Reloaded: 8 plugins · 20 skills · 6 agents
 
 📦 Plugins — 6 enabled, 1 disabled
 ✅ cache-tax v2.2.1 · cache-tax-local
-✅ folder-title v0.2.1 · wipeer-claude-mods
+✅ folder-title v1.0.0 · wipeer-claude-mods
 ⏸️ old-thing v0.1.0 · some-marketplace
 ```
 
