@@ -17,6 +17,11 @@
       "name": "drop-relay",
       "source": "./plugins/drop-relay",
       "description": "Shows why a hook blocked a prompt on every device, Remote Control included, as a transcript notice"
+    },
+    {
+      "name": "session-launcher",
+      "source": "./plugins/session-launcher",
+      "description": "/fs [folder] starts a fresh Remote Control session in auto mode, in this folder or another, from any device"
     }
   ]
 }

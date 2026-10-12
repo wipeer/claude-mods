@@ -1,0 +1,47 @@
+{
+  "name": "session-launcher",
+  "version": "0.1.0",
+  "description": "/fs [folder] starts a fresh Remote Control session in auto mode, in this folder or another, from any device",
+  "author": {
+    "name": "wipeer"
+  },
+  "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/session-launcher",
+  "repository": "https://github.com/wipeer/claude-mods",
+  "license": "MIT",
+  "keywords": [
+    "session",
+    "remote-control",
+    "launcher",
+    "desktop",
+    "terminal"
+  ],
+  "userConfig": {
+    "launcher": {
+      "type": "string",
+      "title": "Where to start the session",
+      "description": "terminal: a new terminal window running claude (see kind). desktop: the desktop app's new-session screen for the folder, with terminal as the fallback and always from a remote device. both: the two.",
+      "options": [
+        "terminal",
+        "desktop",
+        "both"
+      ],
+      "default": "terminal"
+    },
+    "kind": {
+      "type": "string",
+      "title": "Session kind",
+      "description": "server: `claude remote-control --permission-mode auto`, a fresh session plus a server that starts more from your phone or claude.ai/code. interactive: `claude --permission-mode auto --remote-control`, one session you can also use in the window.",
+      "options": [
+        "server",
+        "interactive"
+      ],
+      "default": "server"
+    },
+    "roots": {
+      "type": "string",
+      "title": "Project roots",
+      "description": "Extra folders, separated by ';', searched for a folder name given to /fs. The current folder and its parent are always searched.",
+      "default": ""
+    }
+  }
+}
