@@ -14,14 +14,29 @@
       "description": "Lists plugins and skills with versions after /reload-plugins and /reload-skills"
     },
     {
-      "name": "drop-relay",
-      "source": "./plugins/drop-relay",
-      "description": "Shows why a hook blocked a prompt on every device, Remote Control included, as a transcript notice"
+      "name": "remote-relay",
+      "source": "./plugins/remote-relay",
+      "description": "Over Remote Control, posts other mods' toasts, notifications, status changes and dialogs as notices every device shows"
     },
     {
       "name": "session-launcher",
       "source": "./plugins/session-launcher",
       "description": "/fs [folder] starts a fresh Remote Control session in auto mode, in this folder or another, from any device"
+    },
+    {
+      "name": "blast-radius",
+      "source": "./plugins/blast-radius",
+      "description": "Holds risky shell commands and shows what they would change; Proceed or Cancel on any device, Remote Control included (fork of Anthropic's Blast Radius)"
+    },
+    {
+      "name": "token-weather",
+      "source": "./plugins/token-weather",
+      "description": "A context window forecast above the prompt, posted as a notice over Remote Control when it changes (fork of Anthropic's Token Weather)"
+    },
+    {
+      "name": "cache-tax",
+      "source": "./plugins/cache-tax",
+      "description": "Keeps the prompt cache warm during breaks and stops a cold send once with its price; posted as notices over Remote Control (fork of Karan Bansal's Cache Tax)"
     }
   ]
 }

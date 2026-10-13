@@ -1,0 +1,19 @@
+{
+  "name": "remote-relay",
+  "version": "1.0.0",
+  "description": "Over Remote Control, posts other mods' toasts, notifications, status changes and dialogs as transcript notices every device shows",
+  "author": { "name": "wipeer" },
+  "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/remote-relay",
+  "repository": "https://github.com/wipeer/claude-mods",
+  "license": "MIT",
+  "keywords": ["remote-control", "mobile", "notices", "toast", "status"],
+  "userConfig": {
+    "mirror": {
+      "type": "string",
+      "title": "When to mirror",
+      "description": "remote: only where no screen draws the session (Remote Control). always: also where a terminal draws it, so a phone attached to a terminal session sees the same, at the cost of each line twice there.",
+      "options": ["remote", "always"],
+      "default": "remote"
+    }
+  }
+}

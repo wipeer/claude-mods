@@ -1,0 +1,19 @@
+{
+  "name": "blast-radius",
+  "version": "0.2.0",
+  "description": "Holds risky shell commands (rm -rf, git reset --hard, git clean, force push, migrations) and shows what they would change; answered with Proceed or Cancel on any device, Remote Control included",
+  "author": { "name": "wipeer" },
+  "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/blast-radius",
+  "repository": "https://github.com/wipeer/claude-mods",
+  "license": "Apache-2.0",
+  "keywords": ["safety", "git", "remote-control", "mobile"],
+  "userConfig": {
+    "answer": {
+      "type": "string",
+      "title": "How to ask",
+      "description": "auto: a pane with the report where a screen draws Claude Code, the native question elsewhere (Remote Control). ask: always the native question, which the terminal and every attached device show. pane: always the pane.",
+      "options": ["auto", "ask", "pane"],
+      "default": "auto"
+    }
+  }
+}
