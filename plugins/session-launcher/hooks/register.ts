@@ -14,6 +14,12 @@ export const parentOf = (p: string) => {
   return cut <= 0 ? p : p.slice(0, /^[A-Za-z]:$/.test(p.slice(0, cut)) ? cut + 1 : cut)
 }
 export const baseName = (p: string) => trimSep(p).split(/[\\/]/).pop() || p
+// "catan - 20261030-0757": folder name plus local date and time.
+export const sessionName = (folder: string, now = new Date()) => {
+  const p = (n: number) => String(n).padStart(2, '0')
+  const stamp = `${now.getFullYear()}${p(now.getMonth() + 1)}${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}`
+  return `${baseName(folder)} - ${stamp}`
+}
 const unquote = (s: string) => s.trim().replace(/^(["'])(.*)\1$/, '$2')
 
 // The places a folder argument may name, in the order tried: an absolute path
@@ -128,7 +134,7 @@ export const register: Register = (on, options) => {
     if (!folder) return { text: `No folder "${unquote(arg)}". Looked in:\n${places.map(p => `  ${p}`).join('\n')}` }
 
     const os = await osOf($)
-    const name = baseName(folder)
+    const name = sessionName(folder)
     // The desktop link only opens the new-session screen: somebody at this
     // machine has to send it, so a remote device always gets a terminal too.
     const { wantsDesktop, wantsTerminal } = plan(launcher, e.origin?.kind === 'bridge')

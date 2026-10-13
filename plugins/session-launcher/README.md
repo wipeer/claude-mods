@@ -8,7 +8,7 @@ Start a fresh Claude Code session without leaving the one you're in, from your d
 /fresh-session ...  same as /fs
 ```
 
-It does what you would do by hand, `cd <folder>` and then `claude remote-control --permission-mode auto`, in a new terminal window, named after the folder. The session shows up in claude.ai/code and the Claude mobile app as soon as it connects, and from there you can start more sessions in that folder.
+It does what you would do by hand, `cd <folder>` and then `claude remote-control --permission-mode auto`, in a new terminal window, named `<folder> - <yyyymmdd-hhmm>` (folder name plus local date and time, e.g. `catan - 20261030-0757`). The session shows up in claude.ai/code and the Claude mobile app as soon as it connects, and from there you can start more sessions in that folder.
 
 ## Session kind
 
@@ -16,8 +16,8 @@ The `kind` option picks the command:
 
 | `kind` | Command | Use it when |
 | --- | --- | --- |
-| `server` (default) | `claude remote-control --permission-mode auto --name <folder>` | You work from the phone or the web. The window only shows the server's status. |
-| `interactive` | `claude --permission-mode auto --remote-control <folder>` | You also want to type in the terminal window itself. |
+| `server` (default) | `claude remote-control --permission-mode auto --name "<folder> - <yyyymmdd-hhmm>"` | You work from the phone or the web. The window only shows the server's status. |
+| `interactive` | `claude --permission-mode auto --remote-control "<folder> - <yyyymmdd-hhmm>"` | You also want to type in the terminal window itself. |
 
 `claude remote-control` serves a folder only once per computer. If a server is already running there, it prints `This folder is already served...` and gives up after about a minute. The window then starts the `interactive` command instead, so `/fs` always ends with a fresh session.
 

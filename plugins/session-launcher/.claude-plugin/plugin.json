@@ -1,6 +1,6 @@
 {
   "name": "session-launcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "/fs [folder] starts a fresh Remote Control session in auto mode, in this folder or another, from any device",
   "author": {
     "name": "wipeer"

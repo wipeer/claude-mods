@@ -1,5 +1,9 @@
 import { describe, expect, mock, test } from 'claude-code/testing'
-import { candidates, claudeArgvs, desktopUrl, parentOf, plan, terminalArgvs } from './register'
+import { candidates, claudeArgvs, desktopUrl, parentOf, plan, sessionName, terminalArgvs } from './register'
+
+test('sessionName is the folder name plus a local yyyymmdd-hhmm stamp', () => {
+  expect(sessionName('C:\\_projects\\catan', new Date(2026, 9, 30, 7, 57))).toBe('catan - 20261030-0757')
+})
 
 const dirs = new Set(['C:\\_projects\\claude-mods', 'C:\\_projects\\catan'])
 
@@ -56,16 +60,19 @@ describe('session-launcher', () => {
     windows(on, runs)
     const r = await $.command.run({ command: 'fs' })
     expect(runs).toHaveLength(1)
-    expect(runs[0].slice(0, 7)).toEqual(['wt.exe', '-w', 'new', '--title', 'claude-mods', '-d', 'C:\\_projects\\claude-mods'])
+    const name = runs[0][4]
+    expect(name).toMatch(/^claude-mods - \d{8}-\d{4}$/)
+    expect(runs[0].slice(0, 7)).toEqual(['wt.exe', '-w', 'new', '--title', name, '-d', 'C:\\_projects\\claude-mods'])
     expect(r.text).toContain('Started a fresh session in C:\\_projects\\claude-mods')
-    expect(runs[0].slice(7, 15)).toEqual(['cmd.exe', '/c', 'claude', 'remote-control', '--permission-mode', 'auto', '--name', 'claude-mods'])
+    expect(runs[0].slice(7, 15)).toEqual(['cmd.exe', '/c', 'claude', 'remote-control', '--permission-mode', 'auto', '--name', name])
   })
 
   test('interactive kind runs claude --remote-control', { options: { kind: 'interactive' } }, async ($, on) => {
     const runs: string[][] = []
     windows(on, runs)
     await $.command.run({ command: 'fs' })
-    expect(runs[0].slice(7)).toEqual(['claude', '--permission-mode', 'auto', '--remote-control', 'claude-mods'])
+    expect(runs[0].slice(7)).toEqual(['claude', '--permission-mode', 'auto', '--remote-control', runs[0][4]])
+    expect(runs[0][4]).toMatch(/^claude-mods - \d{8}-\d{4}$/)
   })
 
   test('/fresh-session <name> finds a sibling folder and falls back to start', async ($, on) => {
@@ -74,7 +81,7 @@ describe('session-launcher', () => {
     const r = await $.command.run({ command: 'fresh-session', args: 'catan' })
     expect(runs.map(a => a[0])).toEqual(['wt.exe', 'cmd.exe'])
     expect(runs[1]).toContain('C:\\_projects\\catan')
-    expect(r.text).toContain('(cmd.exe: claude remote-control --permission-mode auto --name catan)')
+    expect(r.text).toMatch(/\(cmd\.exe: claude remote-control --permission-mode auto --name catan - \d{8}-\d{4}\)/)
   })
 
   test('an unknown folder lists where it looked', async ($, on) => {
