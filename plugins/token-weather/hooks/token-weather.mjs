@@ -1,8 +1,8 @@
 // Copyright 2026 Anthropic PBC
 // SPDX-License-Identifier: Apache-2.0
 // Modified 2026 by wipeer: where no screen draws the band (Remote Control),
-// a change of forecast is posted as a transcript notice, and /weather reads
-// the forecast out on any device.
+// a change of forecast (or, by setting, every reply's) is posted as a
+// transcript notice, and /weather reads the forecast out on any device.
 //
 // Token Weather: a live forecast of the context window, above the prompt.
 //
@@ -37,9 +37,12 @@ let readings = [];
 let lastWord = null;
 // When to post notices: "remote" (no screen draws the band), "always" or "off".
 let notices = "remote";
+// How often: "change" (a new forecast word) or "reply" (after every reply).
+let cadence = "change";
 
 export function register(on, options) {
   notices = options?.notices ?? "remote";
+  cadence = options?.cadence ?? "change";
 
   on("session.start", async ($, e, next) => {
     const result = await next(e);
@@ -95,8 +98,9 @@ async function takeReading($) {
   }
 }
 
-// Posts the forecast when its word changes. The first reading is posted only
-// when it is past Clear, as a resumed session's may be.
+// Posts the forecast when its word changes, or after every reply with cadence
+// "reply". On change, the first reading is posted only when it is past Clear,
+// as a resumed session's may be.
 async function postChange($) {
   if (notices === "off" || (notices === "remote" && !(await hasNoScreen($)))) {
     return;
@@ -104,7 +108,7 @@ async function postChange($) {
   const word = forecastFor(readings[readings.length - 1].percent).word;
   const isNew = lastWord === null ? word !== FORECAST[0].word : word !== lastWord;
   lastWord = word;
-  if (!isNew) {
+  if (!isNew && cadence !== "reply") {
     return;
   }
   const text = `token-weather: ${line()}`;

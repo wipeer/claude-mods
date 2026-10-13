@@ -8,6 +8,7 @@ import type { EngineInterface, Register } from 'claude-code'
 // mods that run beneath it.
 
 type Mirror = 'remote' | 'always'
+type Digest = 'off' | 'reply'
 
 const REPEAT_MS = 30_000
 const RECENT_MAX = 100
@@ -50,7 +51,9 @@ async function post($: EngineInterface, recent: Map<string, number>, text: strin
 
 export const register: Register = (on, options) => {
   const mirror = (options.mirror as Mirror | undefined) ?? 'remote'
+  const digest = (options.digest as Digest | undefined) ?? 'off'
   const shapes = new Map<string, string>()
+  // Each mod's pinned status line, by the mod that pinned it.
   const lines = new Map<string, string>()
   const recent = new Map<string, number>()
 
@@ -68,7 +71,24 @@ export const register: Register = (on, options) => {
       ? mirror === 'always' ? 'mirroring on every device' : 'mirroring: no screen draws this session'
       : 'not mirroring: a screen draws this session'
     const pinned = [...lines.values()]
-    return { text: [`remote-relay: ${state}`, ...(pinned.length ? pinned.map(line => `  ${line}`) : ['  no status lines pinned'])].join('\n') }
+    const each = digest === 'reply' ? ['  after each reply, posts the lines below'] : []
+    return { text: [`remote-relay: ${state}`, ...each, ...(pinned.length ? pinned.map(line => `  ${line}`) : ['  no status lines pinned'])].join('\n') }
+  })
+
+  // With digest on, each main-loop reply ends with every pinned line as it
+  // stands, numbers included, in one notice. Never deduplicated: it is the
+  // reply's footer, so an unchanged line is still worth seeing.
+  on('turn.complete', async ($, e, next) => {
+    const result = await next(e)
+    if (digest === 'reply' && !e.agentId && lines.size > 0 && (await isMirroring($, mirror))) {
+      const text = [...lines.values()].join('\n')
+      try {
+        await $.session.append({ message: { type: 'system', content: [{ type: 'text', text }] } })
+      } catch {
+        $.ui.log(text)
+      }
+    }
+    return result
   })
 
   on('ui.toast', async ($, e, next) => {
@@ -82,11 +102,14 @@ export const register: Register = (on, options) => {
   })
 
   on('ui.status', async ($, e, next) => {
-    // A cleared line names no topic, so it is left alone.
-    if (e.text !== undefined && e.text.trim() !== '') {
+    const owner = next.origin?.plugin
+    if (e.text === undefined || e.text.trim() === '') {
+      // A cleared line names no topic; only its owner says whose it was.
+      if (owner) lines.delete(owner)
+    } else {
       const topic = statusTopic(e.text)
       const shape = statusShape(e.text)
-      lines.set(topic, e.text)
+      lines.set(owner ?? topic, e.text)
       if (shapes.get(topic) !== shape) {
         shapes.set(topic, shape)
         if (await isMirroring($, mirror)) await post($, recent, e.text)

@@ -40,3 +40,14 @@ test('/weather reads the forecast out', async ($, on) => {
   const result = await $.command.run({ command: 'weather', args: '' } as never)
   expect(JSON.stringify(result)).toContain('Storm')
 })
+
+test('with cadence reply, every reply posts the forecast', { options: { cadence: 'reply' } }, async ($, on) => {
+  const session = mock.session(on)
+  const tokens = usage(on)
+  await $.session.start({ source: 'startup', cwd: '/work' } as never)
+  tokens.value = 20_000
+  await $.turn.complete(turn)
+  tokens.value = 22_000
+  await $.turn.complete(turn)
+  expect(notices(session).match(/Clear/g)).toHaveLength(2)
+})

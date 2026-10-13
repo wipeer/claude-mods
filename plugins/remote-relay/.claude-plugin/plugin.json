@@ -1,6 +1,6 @@
 {
   "name": "remote-relay",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Over Remote Control, posts other mods' toasts, notifications, status changes and dialogs as transcript notices every device shows",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/remote-relay",
@@ -14,6 +14,13 @@
       "description": "remote: only where no screen draws the session (Remote Control). always: also where a terminal draws it, so a phone attached to a terminal session sees the same, at the cost of each line twice there.",
       "options": ["remote", "always"],
       "default": "remote"
+    },
+    "digest": {
+      "type": "string",
+      "title": "After each reply",
+      "description": "reply: after every reply, post all status lines mods have pinned (keepwarm and the like) in one notice, numbers included. off: post a line only when its state changes.",
+      "options": ["off", "reply"],
+      "default": "off"
     }
   }
 }

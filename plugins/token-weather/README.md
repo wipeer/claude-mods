@@ -30,6 +30,10 @@ This is a fork of [Token Weather](https://github.com/anthropics/claude-code-play
 - `always`: also in a terminal session, for following it from your phone.
 - `off`: never.
 
+`cadence`:
+- `change` (default): post when the forecast word changes.
+- `reply`: post the forecast line after every reply, with the fill, chart and last turn's growth.
+
 ## Install
 
 ```
