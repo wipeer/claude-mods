@@ -31,7 +31,7 @@
     {
       "name": "token-weather",
       "source": "./plugins/token-weather",
-      "description": "A context window forecast above the prompt, posted as a notice over Remote Control when it changes (fork of Anthropic's Token Weather)"
+      "description": "A context window forecast above the prompt, posted as a notice over Remote Control after every reply (fork of Anthropic's Token Weather)"
     },
     {
       "name": "cache-tax",

@@ -1,7 +1,7 @@
 // Copyright 2026 Anthropic PBC
 // SPDX-License-Identifier: Apache-2.0
 // Modified 2026 by wipeer: where no screen draws the band (Remote Control),
-// a change of forecast (or, by setting, every reply's) is posted as a
+// every reply's forecast (or, by setting, only a change of it) is posted as a
 // transcript notice, and /weather reads the forecast out on any device.
 //
 // Token Weather: a live forecast of the context window, above the prompt.
@@ -38,11 +38,11 @@ let lastWord = null;
 // When to post notices: "remote" (no screen draws the band), "always" or "off".
 let notices = "remote";
 // How often: "change" (a new forecast word) or "reply" (after every reply).
-let cadence = "change";
+let cadence = "reply";
 
 export function register(on, options) {
   notices = options?.notices ?? "remote";
-  cadence = options?.cadence ?? "change";
+  cadence = options?.cadence ?? "reply";
 
   on("session.start", async ($, e, next) => {
     const result = await next(e);

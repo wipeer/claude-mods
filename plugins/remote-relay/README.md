@@ -22,7 +22,7 @@ It replaces [drop-relay](https://github.com/wipeer/claude-mods/tree/72349da/plug
 
 `/relay` shows whether it is mirroring and the status lines mods have pinned now, numbers included.
 
-Notices are shown to you and never to the model, so they add nothing to the conversation's context. The same line twice within 30 seconds is posted once.
+Notices are shown to you and never to the model, so they add nothing to the conversation's context. Every toast and notification is posted each time it fires, repeats included.
 
 ## Settings
 
@@ -31,14 +31,14 @@ Notices are shown to you and never to the model, so they add nothing to the conv
 - `always`: also mirror in a terminal session. Use this when you follow a terminal session from your phone. The terminal then shows each line twice: as the mod drew it, and as a notice.
 
 `digest`:
-- `off` (default): a status line is posted when its state changes.
-- `reply`: after every reply, all status lines mods have pinned are posted in one notice, numbers included, so each reply ends with where things stand:
+- `reply` (default): after every reply, all status lines mods have pinned are posted in one notice, numbers included, so each reply ends with where things stand:
 
   ```
   cache-tax: keepwarm 2h59m left · ping in 49m
   ```
 
   Lines are tracked per mod, and a mod that clears its line drops out. Subagent turns don't post.
+- `off`: a status line is posted only when its state changes.
 
 ## Limitations
 

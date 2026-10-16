@@ -1,6 +1,6 @@
 # token-weather
 
-A live forecast of the context window above the prompt: a weather icon, how full the window is, and a chart of the last turns. Over Remote Control, where the band can't be drawn, it posts a notice when the forecast changes.
+A live forecast of the context window above the prompt: a weather icon, how full the window is, and a chart of the last turns. Over Remote Control, where the band can't be drawn, it posts the forecast as a notice after every reply.
 
 This is a fork of [Token Weather](https://github.com/anthropics/claude-code-playground/tree/main/claude-code/mods/token-weather) by Claude Code DevRel (Anthropic), under the Apache License 2.0 (see [LICENSE](LICENSE)). The changes are listed below.
 
@@ -14,13 +14,13 @@ This is a fork of [Token Weather](https://github.com/anthropics/claude-code-play
 
 ## Changes from upstream
 
-- **Remote Control.** A `claude remote-control` session has no screen, so the band is never drawn. There, each change of forecast is posted as a notice. That's about four a session, and the last is the warning to compact:
+- **Remote Control.** A `claude remote-control` session has no screen, so the band is never drawn. There, the forecast is posted as a notice after every reply (or, with `cadence: change`, only when it changes, about four a session, the last being the warning to compact):
 
   ```
   token-weather: ☂ Showers · 52% of context (104k / 200k) · last turns ▁▂▃▅▇ · ▲ +12k last turn
   ```
 
-  A fresh session's first Clear isn't posted. A resumed session that is already past Clear is posted at the first turn. Notices are shown to you, never to the model.
+  With `cadence: change`, a fresh session's first Clear isn't posted, and a resumed session that is already past Clear is posted at the first turn. Notices are shown to you, never to the model.
 - **`/weather`** reads the current forecast out on any device.
 
 ## Setting
@@ -31,8 +31,8 @@ This is a fork of [Token Weather](https://github.com/anthropics/claude-code-play
 - `off`: never.
 
 `cadence`:
-- `change` (default): post when the forecast word changes.
-- `reply`: post the forecast line after every reply, with the fill, chart and last turn's growth.
+- `reply` (default): post the forecast line after every reply, with the fill, chart and last turn's growth.
+- `change`: post only when the forecast word changes, about four times a session.
 
 ## Install
 

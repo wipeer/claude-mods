@@ -1,6 +1,6 @@
 {
   "name": "remote-relay",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Over Remote Control, posts other mods' toasts, notifications, status changes and dialogs as transcript notices every device shows",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/remote-relay",
@@ -19,8 +19,8 @@
       "type": "string",
       "title": "After each reply",
       "description": "reply: after every reply, post all status lines mods have pinned (keepwarm and the like) in one notice, numbers included. off: post a line only when its state changes.",
-      "options": ["off", "reply"],
-      "default": "off"
+      "options": ["reply", "off"],
+      "default": "reply"
     }
   }
 }

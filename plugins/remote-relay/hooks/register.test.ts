@@ -38,7 +38,7 @@ const pinner = {
 }
 const pin = ($: Parameters<TestBody>[0], text: string) => $.command.run({ command: 'pin', args: text } as never)
 
-test('with digest reply, each reply posts the pinned lines', { plugins: [pinner], options: { digest: 'reply' } }, async ($, on) => {
+test('by default, each reply posts the pinned lines', { plugins: [pinner] }, async ($, on) => {
   const session = mock.session(on)
   on('turn.complete', () => ({ text: '' }) as never)
   on('ui.status', () => ({ value: undefined }) as never)
@@ -51,7 +51,7 @@ test('with digest reply, each reply posts the pinned lines', { plugins: [pinner]
   expect(appended(session).match(/keepwarm/g)).toHaveLength(3)
 })
 
-test('a cleared line leaves the digest', { plugins: [pinner], options: { digest: 'reply' } }, async ($, on) => {
+test('a cleared line leaves the digest', { plugins: [pinner] }, async ($, on) => {
   const session = mock.session(on)
   on('turn.complete', () => ({ text: '' }) as never)
   on('ui.status', () => ({ value: undefined }) as never)
@@ -62,7 +62,7 @@ test('a cleared line leaves the digest', { plugins: [pinner], options: { digest:
   expect(appended(session).match(/keepwarm/g)).toHaveLength(1)
 })
 
-test('without digest, a reply posts nothing', { plugins: [pinner] }, async ($, on) => {
+test('with digest off, a reply posts nothing', { plugins: [pinner], options: { digest: 'off' } }, async ($, on) => {
   const session = mock.session(on)
   on('turn.complete', () => ({ text: '' }) as never)
   on('ui.status', () => ({ value: undefined }) as never)
@@ -71,4 +71,23 @@ test('without digest, a reply posts nothing', { plugins: [pinner] }, async ($, o
   await $.turn.complete(turn)
   await $.turn.complete(turn)
   expect(appended(session).match(/keepwarm/g)).toHaveLength(1)
+})
+
+// A mod beneath the relay that toasts its args on /toast.
+const toaster = {
+  name: 'toaster',
+  register(on: Parameters<Register>[0]) {
+    on('command.run', { command: 'toast' }, async ($, e) => {
+      $.ui.toast(e.args)
+      return { text: '' }
+    })
+  },
+}
+
+test('the same toast twice is posted twice', { plugins: [toaster], options: { mirror: 'always' } }, async ($, on) => {
+  const session = mock.session(on)
+  on('ui.toast', () => ({ value: undefined }) as never)
+  await $.command.run({ command: 'toast', args: 'Blast Radius: running it' } as never)
+  await $.command.run({ command: 'toast', args: 'Blast Radius: running it' } as never)
+  expect(appended(session).match(/running it/g)).toHaveLength(2)
 })

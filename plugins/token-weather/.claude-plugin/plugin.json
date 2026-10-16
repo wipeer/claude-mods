@@ -1,7 +1,7 @@
 {
   "name": "token-weather",
-  "version": "0.3.0",
-  "description": "A live forecast of the context window above the prompt; over Remote Control each change of forecast is posted as a notice, and /weather reads it out",
+  "version": "0.4.0",
+  "description": "A live forecast of the context window above the prompt; over Remote Control the forecast is posted as a notice after every reply, and /weather reads it out",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/token-weather",
   "repository": "https://github.com/wipeer/claude-mods",
@@ -19,8 +19,8 @@
       "type": "string",
       "title": "How often to post",
       "description": "change: a notice when the forecast word changes, about four a session. reply: the full forecast line after every reply.",
-      "options": ["change", "reply"],
-      "default": "change"
+      "options": ["reply", "change"],
+      "default": "reply"
     }
   }
 }

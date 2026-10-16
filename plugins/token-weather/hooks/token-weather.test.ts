@@ -16,7 +16,7 @@ const notices = (s: ReturnType<typeof mock.session>) =>
 
 const turn = { reason: 'answer', answer: 'done', isAborted: false, turnId: 't1', durationMs: 1000 } as never
 
-test('with no screen, a new forecast is posted once', async ($, on) => {
+test('with cadence change, a new forecast is posted once', { options: { cadence: 'change' } }, async ($, on) => {
   const session = mock.session(on)
   const tokens = usage(on)
   await $.session.start({ source: 'startup', cwd: '/work' } as never)
@@ -41,7 +41,7 @@ test('/weather reads the forecast out', async ($, on) => {
   expect(JSON.stringify(result)).toContain('Storm')
 })
 
-test('with cadence reply, every reply posts the forecast', { options: { cadence: 'reply' } }, async ($, on) => {
+test('by default, every reply posts the forecast', async ($, on) => {
   const session = mock.session(on)
   const tokens = usage(on)
   await $.session.start({ source: 'startup', cwd: '/work' } as never)
