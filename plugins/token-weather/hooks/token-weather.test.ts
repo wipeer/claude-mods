@@ -51,3 +51,42 @@ test('by default, every reply posts the forecast', async ($, on) => {
   await $.turn.complete(turn)
   expect(notices(session).match(/Clear/g)).toHaveLength(2)
 })
+
+test('/ww is /weather', async ($, on) => {
+  mock.session(on)
+  const tokens = usage(on)
+  await $.session.start({ source: 'startup', cwd: '/work' } as never)
+  tokens.value = 160_000
+  await $.turn.complete(turn)
+  const weather = await $.command.run({ command: 'weather', args: '' } as never)
+  const ww = await $.command.run({ command: 'ww', args: '' } as never)
+  expect(ww).toEqual(weather)
+})
+
+test('/wch stacks on a part answered beneath and drops a foreign answer', async ($, on) => {
+  mock.session(on)
+  const tokens = usage(on)
+  let below = 'cache-tax\nstate       warm'
+  on('command.run', { command: 'wch' }, () => ({ text: below }))
+  await $.session.start({ source: 'startup', cwd: '/work' } as never)
+  tokens.value = 20_000
+  await $.turn.complete(turn)
+  const both = JSON.stringify(await $.command.run({ command: 'wch', args: '' } as never))
+  expect(both).toContain('Clear')
+  expect(both).toContain('state       warm')
+  below = 'No hook answered /wch'
+  const alone = JSON.stringify(await $.command.run({ command: 'wch', args: '' } as never))
+  expect(alone).toContain('Clear')
+  expect(alone).not.toContain('No hook')
+})
+
+test('/w-help merges the command lines beneath', async ($, on) => {
+  mock.session(on)
+  usage(on)
+  on('command.run', { command: 'w-help' }, () => ({ text: 'w-mods slash commands\n/keepwarm  (/wkw)  keep warm\n/wch  /wct and /ww at once' }))
+  await $.session.start({ source: 'startup', cwd: '/work' } as never)
+  const text = String((await $.command.run({ command: 'w-help', args: '' } as never)).text)
+  expect(text).toContain('/weather  (/ww)')
+  expect(text).toContain('/keepwarm  (/wkw)')
+  expect(text.match(/\/wch/g)).toHaveLength(1)
+})

@@ -20,7 +20,9 @@ It replaces [drop-relay](https://github.com/wipeer/claude-mods/tree/72349da/plug
 | `$.ui.status` | the line, when its wording changes. A countdown that only changes its numbers is posted once, not every minute. |
 | `$.ui.open` with `focus` (a dialog) | that the mod opened a dialog this device can't show |
 
-`/relay` shows whether it is mirroring and the status lines mods have pinned now, numbers included.
+`/relay` shows whether it is mirroring and the status lines mods have pinned now, numbers included. `/w-help` lists `/relay` with the short commands of cache-tax and token-weather.
+
+When you follow a desktop or terminal session from your phone, that session has a screen, so the default `mirror: remote` posts nothing there. Set `mirror` to `always` (and token-weather's `notices` to `always`) to get the notices on the phone too.
 
 Notices are shown to you and never to the model, so they add nothing to the conversation's context. Every toast and notification is posted each time it fires, repeats included.
 

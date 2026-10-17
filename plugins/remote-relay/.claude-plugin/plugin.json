@@ -1,6 +1,6 @@
 {
   "name": "remote-relay",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Over Remote Control, posts other mods' toasts, notifications, status changes and dialogs as transcript notices every device shows",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/remote-relay",

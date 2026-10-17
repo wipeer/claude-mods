@@ -9,6 +9,7 @@ This is a fork of [Cache Tax](https://github.com/karanb192/claude-code-mods) 2.2
 - **`/keepwarm [6h | 90m | always | off | status]`** arms a window. After 50 idle minutes it sends one small ping that reads the cache, so it isn't re-written when you come back. Pings cost tokens.
 - **The guard:** when a session of 50,000 tokens or more has gone cold, your next message is dropped once with its price. Send it again to pay it, or `/clear` and start from a note. `/cache-tax guard warn` only shows the price.
 - **`/cache-tax`** shows the cache state, the cold price and this session's cold writes.
+- **Short forms:** `/wkw` is `/keepwarm`, `/wct` is `/cache-tax`. `/wch` shows `/wct` and token-weather's `/ww` together, and `/w-help` lists every command of these mods.
 
 ## Changes from upstream
 

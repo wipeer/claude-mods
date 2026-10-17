@@ -49,12 +49,29 @@ export function register(on, options) {
     readings = [];
     lastWord = null;
     await $.command.register({ name: "weather", description: "Context window forecast: how full it is and how the last turns grew it (token-weather)" });
+    await $.command.register({ name: "ww", description: "Short for /weather (token-weather)" });
+    // /wch and /w-help are shared with cache-tax and remote-relay: each mod adds its part.
+    await registerShared($);
     await takeReading($);
     return result;
   });
 
   on("command.run", { command: "weather" }, async ($) => {
-    return { text: readings.length === 0 ? "token-weather: no reading yet; one comes after the first turn" : `token-weather: ${line()}` };
+    return { text: weatherText() };
+  });
+
+  on("command.run", { command: "ww" }, async ($) => {
+    return { text: weatherText() };
+  });
+
+  on("command.run", { command: "wch" }, async ($, e, next) => {
+    const below = await beneath(next, e);
+    return { text: stack(weatherText(), below?.text) };
+  });
+
+  on("command.run", { command: "w-help" }, async ($, e, next) => {
+    const below = await beneath(next, e);
+    return { text: helpStack(HELP, below?.text) };
   });
 
   on("turn.complete", async ($, e, next) => {
@@ -116,6 +133,50 @@ async function postChange($) {
     await $.session.append({ message: { type: "system", content: [{ type: "text", text }] } });
   } catch {
     $.ui.log(text);
+  }
+}
+
+function weatherText() {
+  return readings.length === 0 ? "token-weather: no reading yet; one comes after the first turn" : `token-weather: ${line()}`;
+}
+
+// /wch and /w-help are shared with cache-tax and remote-relay: each mod that
+// serves them adds its part above what the mods beneath answered. The engine's
+// own answer, for a command no hook below served, is not a part and is dropped.
+const SECTIONS = ["cache-tax", "token-weather"];
+const HELP = [
+  "/weather  (/ww)  context window forecast",
+  "/wch  /wct and /ww at once",
+  "/w-help  these commands",
+];
+
+export function stack(mine, below) {
+  const theirs = below && SECTIONS.some((name) => below.startsWith(name)) ? below : "";
+  return theirs ? `${mine}\n\n${theirs}` : mine;
+}
+
+export function helpStack(mine, below) {
+  const theirs = (below ?? "").split("\n").filter((l) => l.startsWith("/"));
+  return ["w-mods slash commands", ...[...new Set([...mine, ...theirs])].sort()].join("\n");
+}
+
+// What the mods beneath answered, or nothing when no hook below serves the command.
+async function beneath(next, e) {
+  try {
+    return await next(e);
+  } catch {
+    return undefined;
+  }
+}
+
+// Another w-mod may have registered these names first; a refusal still leaves
+// this mod's hooks serving them.
+async function registerShared($) {
+  try {
+    await $.command.register({ name: "wch", description: "Cache and context at once: /wct and /ww together (w-mods)", immediate: true });
+    await $.command.register({ name: "w-help", description: "Every slash command of the w-mods (w-mods)", immediate: true });
+  } catch {
+    // Served by the hooks either way.
   }
 }
 

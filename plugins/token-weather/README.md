@@ -21,7 +21,7 @@ This is a fork of [Token Weather](https://github.com/anthropics/claude-code-play
   ```
 
   With `cadence: change`, a fresh session's first Clear isn't posted, and a resumed session that is already past Clear is posted at the first turn. Notices are shown to you, never to the model.
-- **`/weather`** reads the current forecast out on any device.
+- **`/weather`** (or `/ww`) reads the current forecast out on any device. With [cache-tax](../cache-tax) installed, `/wch` shows the cache card and the forecast together; `/w-help` lists every command of these mods.
 
 ## Setting
 

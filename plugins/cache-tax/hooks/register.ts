@@ -2,7 +2,7 @@
 // driven over Remote Control draws on no surface, so its status line and log
 // lines reached no device. There they are posted as transcript notices, which
 // every device shows and the model never reads.
-import type { EngineInterface, Register } from 'claude-code'
+import type { CommandRunInput, CommandRunResult, EngineInterface, Register } from 'claude-code'
 import { statusIcons } from './status-icons'
 
 const TTL_MS = 60 * 60 * 1000
@@ -194,6 +194,48 @@ async function postState($: EngineInterface, s: State, now: number) {
 
 // Remote Control: a session drawn on no surface. A host that cannot say is
 // taken for a local one, as upstream behaved.
+// /wch and /w-help are shared with token-weather and remote-relay: each mod
+// that serves them adds its part above what the mods beneath answered. The
+// engine's own answer, for a command no hook below served, is not a part and
+// is dropped.
+const SECTIONS = ['cache-tax', 'token-weather']
+const HELP = [
+  '/cache-tax  (/wct)  cache state, cold price, cold writes; guard warn | refuse',
+  '/keepwarm  (/wkw)  keep the cache warm: 6h, 90m, always, off, status',
+  '/wch  /wct and /ww at once',
+  '/w-help  these commands',
+]
+
+export function stack(mine: string, below?: string): string {
+  const theirs = below && SECTIONS.some(name => below.startsWith(name)) ? below : ''
+  return theirs ? `${mine}\n\n${theirs}` : mine
+}
+
+export function helpStack(mine: string[], below?: string): string {
+  const theirs = (below ?? '').split('\n').filter(line => line.startsWith('/'))
+  return ['w-mods slash commands', ...[...new Set([...mine, ...theirs])].sort()].join('\n')
+}
+
+// What the mods beneath answered, or nothing when no hook below serves the command.
+async function beneath(next: (e: CommandRunInput) => Promise<CommandRunResult>, e: CommandRunInput): Promise<CommandRunResult | undefined> {
+  try {
+    return await next(e)
+  } catch {
+    return undefined
+  }
+}
+
+// Another w-mod may have registered these names first; registering again
+// replaces the listing, and a refusal still leaves this mod's hooks serving them.
+async function registerShared($: EngineInterface) {
+  try {
+    await $.command.register({ name: 'wch', description: 'Cache and context at once: /wct and /ww together (w-mods)', immediate: true })
+    await $.command.register({ name: 'w-help', description: 'Every slash command of the w-mods (w-mods)', immediate: true })
+  } catch {
+    // Served by the hooks either way.
+  }
+}
+
 async function hasNoScreen($: EngineInterface): Promise<boolean> {
   try {
     return (await $.session.surfaces()).length === 0
@@ -351,6 +393,55 @@ export function freshState(): State {
   }
 }
 
+async function keepwarmCommand($: EngineInterface, s: State, e: CommandRunInput): Promise<CommandRunResult> {
+  const words = String(e.args ?? '').trim().split(/\s+/).filter(Boolean)
+  const now = await $.clock.now()
+  if (words[0] === 'off') {
+    const wasAlways = s.always
+    // The reply says it is off; no notice besides.
+    s.postedKey = 'off'
+    await stop($, s, null, true)
+    return { text: wasAlways ? 'keepwarm is off, and no longer arms itself at session start' : 'keepwarm is off' }
+  }
+  if (words[0] === 'always') {
+    s.always = true
+    await $.store.set(KEY_ALWAYS, true)
+    await startWindow($, s, DEFAULT_WINDOW_MS, PING_AFTER_MS)
+    const cold = isCold(s, now) ? `. The cache is cold now, so the first ping comes ${fmtDuration(s.every)} after the next turn` : ''
+    return { text: `keepwarm always on: every session starts with a ${fmtDuration(DEFAULT_WINDOW_MS)} window; /keepwarm off turns it off for good${cold}` }
+  }
+  if (!words.length) {
+    await startWindow($, s, DEFAULT_WINDOW_MS, PING_AFTER_MS)
+    return { text: armedText(s, now, DEFAULT_WINDOW_MS) }
+  }
+  if (words[0] !== 'status') {
+    const window = parseDuration(words[0])
+    if (window == null) return { text: 'keepwarm takes a window such as 6h or 90m, or always, off, or status' }
+    // "every 2m" is a testing knob and lasts only for the window it was given with.
+    let every = PING_AFTER_MS
+    if (words[1] === 'every') {
+      const period = parseDuration(words[2] ?? '')
+      if (period == null || period < MIN_PING_MS) return { text: 'every takes a period of at least 1m' }
+      every = period
+    }
+    await startWindow($, s, window, every)
+    return { text: armedText(s, now, window) }
+  }
+  return { text: statusText(s, now) ?? 'keepwarm is off' }
+}
+
+async function cacheTaxCommand($: EngineInterface, s: State, e: CommandRunInput): Promise<CommandRunResult> {
+  const words = String(e.args ?? '').trim().split(/\s+/).filter(Boolean)
+  const now = await $.clock.now()
+  if (words[0] === 'guard') {
+    if (words[1] !== 'warn' && words[1] !== 'refuse') return { text: '/cache-tax guard takes warn or refuse' }
+    s.guard = words[1]
+    await $.store.set(KEY_GUARD, s.guard)
+    return { text: s.guard === 'refuse' ? 'guard set to refuse once: a cold send is dropped with its price, the resend goes through' : 'guard set to warn: a cold send goes through with its price shown' }
+  }
+  return { text: card(s, now) }
+}
+
 export const register: Register = on => {
   const s = freshState()
   let light = false
@@ -428,6 +519,10 @@ export const register: Register = on => {
       argumentHint: '[status | guard warn | guard refuse]',
       immediate: true,
     })
+    await $.command.register({ name: 'wkw', description: 'Short for /keepwarm (cache-tax)', argumentHint: '[6h | always | off | status]', immediate: true })
+    await $.command.register({ name: 'wct', description: 'Short for /cache-tax (cache-tax)', argumentHint: '[status | guard warn | guard refuse]', immediate: true })
+    // /wch and /w-help are shared with token-weather: each mod adds its part.
+    await registerShared($)
     // The hook form of cache-tax ships a /cache-tax:status skill; both installed means two guards.
     const commands = await $.command.list()
     if (commands.some(c => c.name === 'cache-tax:status')) {
@@ -458,53 +553,19 @@ export const register: Register = on => {
     return r
   })
 
-  on('command.run', { command: 'keepwarm' }, async ($, e) => {
-    const words = String(e.args ?? '').trim().split(/\s+/).filter(Boolean)
-    const now = await $.clock.now()
-    if (words[0] === 'off') {
-      const wasAlways = s.always
-      // The reply says it is off; no notice besides.
-      s.postedKey = 'off'
-      await stop($, s, null, true)
-      return { text: wasAlways ? 'keepwarm is off, and no longer arms itself at session start' : 'keepwarm is off' }
-    }
-    if (words[0] === 'always') {
-      s.always = true
-      await $.store.set(KEY_ALWAYS, true)
-      await startWindow($, s, DEFAULT_WINDOW_MS, PING_AFTER_MS)
-      const cold = isCold(s, now) ? `. The cache is cold now, so the first ping comes ${fmtDuration(s.every)} after the next turn` : ''
-      return { text: `keepwarm always on: every session starts with a ${fmtDuration(DEFAULT_WINDOW_MS)} window; /keepwarm off turns it off for good${cold}` }
-    }
-    if (!words.length) {
-      await startWindow($, s, DEFAULT_WINDOW_MS, PING_AFTER_MS)
-      return { text: armedText(s, now, DEFAULT_WINDOW_MS) }
-    }
-    if (words[0] !== 'status') {
-      const window = parseDuration(words[0])
-      if (window == null) return { text: 'keepwarm takes a window such as 6h or 90m, or always, off, or status' }
-      // "every 2m" is a testing knob and lasts only for the window it was given with.
-      let every = PING_AFTER_MS
-      if (words[1] === 'every') {
-        const period = parseDuration(words[2] ?? '')
-        if (period == null || period < MIN_PING_MS) return { text: 'every takes a period of at least 1m' }
-        every = period
-      }
-      await startWindow($, s, window, every)
-      return { text: armedText(s, now, window) }
-    }
-    return { text: statusText(s, now) ?? 'keepwarm is off' }
+  on('command.run', { command: 'keepwarm' }, async ($, e) => keepwarmCommand($, s, e))
+  on('command.run', { command: 'wkw' }, async ($, e) => keepwarmCommand($, s, e))
+  on('command.run', { command: 'cache-tax' }, async ($, e) => cacheTaxCommand($, s, e))
+  on('command.run', { command: 'wct' }, async ($, e) => cacheTaxCommand($, s, e))
+
+  on('command.run', { command: 'wch' }, async ($, e, next) => {
+    const below = await beneath(next, e)
+    return { text: stack(`cache-tax\n${card(s, await $.clock.now())}`, below?.text) }
   })
 
-  on('command.run', { command: 'cache-tax' }, async ($, e) => {
-    const words = String(e.args ?? '').trim().split(/\s+/).filter(Boolean)
-    const now = await $.clock.now()
-    if (words[0] === 'guard') {
-      if (words[1] !== 'warn' && words[1] !== 'refuse') return { text: '/cache-tax guard takes warn or refuse' }
-      s.guard = words[1]
-      await $.store.set(KEY_GUARD, s.guard)
-      return { text: s.guard === 'refuse' ? 'guard set to refuse once: a cold send is dropped with its price, the resend goes through' : 'guard set to warn: a cold send goes through with its price shown' }
-    }
-    return { text: card(s, now) }
+  on('command.run', { command: 'w-help' }, async ($, e, next) => {
+    const below = await beneath(next, e)
+    return { text: helpStack(HELP, below?.text) }
   })
 
   // The message that pays. Only its first character is read.

@@ -2,7 +2,7 @@ import { describe, expect, mock, test, tier } from 'claude-code/testing'
 import type { CommandRunInput, ConfigSetInput, ModelForkResult, On, PromptSubmitInput, RenderPropsOf, SessionStartInput, TurnCompleteInput, TurnUsage } from 'claude-code'
 
 import { statusIcons } from '../hooks/status-icons'
-import { fmtDuration, freshState, parseDuration, resetForClear, seedFromResume } from '../hooks/register'
+import { fmtDuration, freshState, helpStack, parseDuration, resetForClear, seedFromResume, stack } from '../hooks/register'
 
 tier('user')
 
@@ -23,7 +23,7 @@ const turn = (over: Partial<AnsweredTurn> = {}): TurnCompleteInput => ({
   answer: 'ok', durationMs: 1000, isAborted: false, turnId: 't' + ++turns, reason: 'answer', usage: usage(), ...over,
 })
 
-const run = (command: 'keepwarm' | 'cache-tax', args: string): CommandRunInput => ({
+const run = (command: 'keepwarm' | 'cache-tax' | 'wkw' | 'wct' | 'wch' | 'w-help', args: string): CommandRunInput => ({
   command, args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 },
 })
 
@@ -894,5 +894,40 @@ describe('remote control', () => {
     await $.turn.complete(turn())
     await $.command.run(run('keepwarm', 'off'))
     expect(notices().slice(before.length)).not.toMatch(/is off/)
+  })
+})
+
+describe('short commands', () => {
+  test('/wkw is /keepwarm and /wct is /cache-tax', async ($, on) => {
+    mock.clock(on, { now: START })
+    const w = world(on, [])
+    await $.session.start(session)
+    await $.command.run(run('wkw', '90m'))
+    expect(w.status.at(-1)).toMatch(/^keepwarm 1h30m left/)
+    expect((await $.command.run(run('wct', ''))).text).toEqual((await $.command.run(run('cache-tax', ''))).text)
+  })
+
+  test('/wch shows the card under a cache-tax heading', async ($, on) => {
+    mock.clock(on, { now: START })
+    world(on, [])
+    await $.session.start(session)
+    const text = String((await $.command.run(run('wch', ''))).text)
+    expect(text).toMatch(/^cache-tax\n/)
+    expect(text).toMatch(/guard       refuse once/)
+  })
+
+  test('/w-help lists the cache-tax commands', async ($, on) => {
+    mock.clock(on, { now: START })
+    world(on, [])
+    await $.session.start(session)
+    const text = String((await $.command.run(run('w-help', ''))).text)
+    expect(text).toMatch(/\/keepwarm  \(\/wkw\)/)
+    expect(text).toMatch(/\/cache-tax  \(\/wct\)/)
+  })
+
+  test('parts stack and a foreign answer beneath is dropped', () => {
+    expect(stack('cache-tax\nx', 'token-weather: Clear')).toBe('cache-tax\nx\n\ntoken-weather: Clear')
+    expect(stack('cache-tax\nx', 'Unknown command')).toBe('cache-tax\nx')
+    expect(helpStack(['/b', '/a'], 'w-mods slash commands\n/a\n/c')).toBe('w-mods slash commands\n/a\n/b\n/c')
   })
 })

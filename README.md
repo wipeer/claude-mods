@@ -12,6 +12,8 @@ Small quality-of-life mods for [Claude Code](https://claude.com/claude-code), pa
 | [token-weather](plugins/token-weather)       | A forecast of how full the context window is; over Remote Control, a notice with the forecast after every reply.                              |
 | [cache-tax](plugins/cache-tax)               | Keeps the prompt cache warm during breaks and stops a cold send once with its price; over Remote Control, as notices.                         |
 
+Short commands: `/wct` (`/cache-tax`), `/wkw` (`/keepwarm`), `/ww` (`/weather`), `/wch` (`/wct` and `/ww` together), `/w-help` (all of them).
+
 ## Install
 
 Type this at the prompt of a terminal Claude Code session:

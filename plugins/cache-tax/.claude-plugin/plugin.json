@@ -1,6 +1,6 @@
 {
   "name": "cache-tax",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Keeps the one-hour prompt cache warm during breaks and stops a cold send once with its estimated rewrite cost; over Remote Control its warnings and keepwarm state are posted as notices. Warming uses model requests and costs tokens.",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/cache-tax",

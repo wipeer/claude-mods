@@ -91,3 +91,10 @@ test('the same toast twice is posted twice', { plugins: [toaster], options: { mi
   await $.command.run({ command: 'toast', args: 'Blast Radius: running it' } as never)
   expect(appended(session).match(/running it/g)).toHaveLength(2)
 })
+
+test('/w-help adds /relay to the lines beneath', async ($, on) => {
+  on('command.run', { command: 'w-help' }, () => ({ text: 'w-mods slash commands\n/weather  (/ww)  forecast' }))
+  const text = String((await $.command.run({ command: 'w-help', args: '' } as never)).text)
+  expect(text).toContain('/relay')
+  expect(text).toContain('/weather  (/ww)')
+})

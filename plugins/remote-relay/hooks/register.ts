@@ -1,4 +1,4 @@
-import type { EngineInterface, Register } from 'claude-code'
+import type { CommandRunInput, CommandRunResult, EngineInterface, Register } from 'claude-code'
 
 // A session driven over Remote Control draws on no surface: other mods'
 // toasts, status lines and dialog panes are drawn nowhere, so a phone sees
@@ -20,6 +20,24 @@ export function statusShape(text: string): string {
 // that each pin a line keep their own last shape.
 export function statusTopic(text: string): string {
   return text.trim().split(/[\s:·]+/)[0] ?? ''
+}
+
+const HELP = ['/relay  what remote-relay mirrors here, and the pinned status lines']
+
+// Each mod serving /w-help adds its lines above those of the mods beneath; the
+// engine's own answer, for a command no hook below served, is dropped.
+export function helpStack(mine: string[], below?: string): string {
+  const theirs = (below ?? '').split('\n').filter(line => line.startsWith('/'))
+  return ['w-mods slash commands', ...[...new Set([...mine, ...theirs])].sort()].join('\n')
+}
+
+// What the mods beneath answered, or nothing when no hook below serves the command.
+async function beneath(next: (e: CommandRunInput) => Promise<CommandRunResult>, e: CommandRunInput): Promise<CommandRunResult | undefined> {
+  try {
+    return await next(e)
+  } catch {
+    return undefined
+  }
 }
 
 async function isMirroring($: EngineInterface, mirror: Mirror): Promise<boolean> {
@@ -53,6 +71,12 @@ export const register: Register = (on, options) => {
       name: 'relay',
       description: 'What remote-relay mirrors here, and the status lines mods have pinned (remote-relay)',
     })
+    // /w-help is shared with cache-tax and token-weather: each mod adds its lines.
+    try {
+      await $.command.register({ name: 'w-help', description: 'Every slash command of the w-mods (w-mods)', immediate: true })
+    } catch {
+      // Served by the hook either way.
+    }
     return result
   })
 
@@ -63,6 +87,11 @@ export const register: Register = (on, options) => {
     const pinned = [...lines.values()]
     const each = digest === 'reply' ? ['  after each reply, posts the lines below'] : []
     return { text: [`remote-relay: ${state}`, ...each, ...(pinned.length ? pinned.map(line => `  ${line}`) : ['  no status lines pinned'])].join('\n') }
+  })
+
+  on('command.run', { command: 'w-help' }, async ($, e, next) => {
+    const below = await beneath(next, e)
+    return { text: helpStack(HELP, below?.text) }
   })
 
   // With digest on, each main-loop reply ends with every pinned line as it
