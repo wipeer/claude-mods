@@ -1,6 +1,6 @@
 {
   "name": "token-weather",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A live forecast of the context window above the prompt; over Remote Control the forecast is posted as a notice after every reply, and /weather reads it out",
   "author": { "name": "wipeer" },
   "homepage": "https://github.com/wipeer/claude-mods/tree/main/plugins/token-weather",

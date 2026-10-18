@@ -74,10 +74,10 @@ test('/wch stacks on a part answered beneath and drops a foreign answer', async 
   const both = JSON.stringify(await $.command.run({ command: 'wch', args: '' } as never))
   expect(both).toContain('Clear')
   expect(both).toContain('state       warm')
-  below = 'No hook answered /wch'
+  below = 'token-weather registered /wch but no command.run hook answered it'
   const alone = JSON.stringify(await $.command.run({ command: 'wch', args: '' } as never))
   expect(alone).toContain('Clear')
-  expect(alone).not.toContain('No hook')
+  expect(alone).not.toContain('registered /wch')
 })
 
 test('/w-help merges the command lines beneath', async ($, on) => {

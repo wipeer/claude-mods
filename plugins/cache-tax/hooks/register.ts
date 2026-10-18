@@ -198,7 +198,8 @@ async function postState($: EngineInterface, s: State, now: number) {
 // that serves them adds its part above what the mods beneath answered. The
 // engine's own answer, for a command no hook below served, is not a part and
 // is dropped.
-const SECTIONS = ['cache-tax', 'token-weather']
+// The exact heads of the parts: the engine's answer may name a mod too ("token-weather registered /wch but...").
+const SECTIONS = ['cache-tax\n', 'token-weather: ']
 const HELP = [
   '/cache-tax  (/wct)  cache state, cold price, cold writes; guard warn | refuse',
   '/keepwarm  (/wkw)  keep the cache warm: 6h, 90m, always, off, status',

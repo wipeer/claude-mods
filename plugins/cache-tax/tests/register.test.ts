@@ -928,6 +928,7 @@ describe('short commands', () => {
   test('parts stack and a foreign answer beneath is dropped', () => {
     expect(stack('cache-tax\nx', 'token-weather: Clear')).toBe('cache-tax\nx\n\ntoken-weather: Clear')
     expect(stack('cache-tax\nx', 'Unknown command')).toBe('cache-tax\nx')
+    expect(stack('cache-tax\nx', 'token-weather registered /wch but no command.run hook answered it')).toBe('cache-tax\nx')
     expect(helpStack(['/b', '/a'], 'w-mods slash commands\n/a\n/c')).toBe('w-mods slash commands\n/a\n/b\n/c')
   })
 })
